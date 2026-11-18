@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harga Emas UBS</title>
+<meta name="description" content="Harga beli dan buyback UBS Gold Bar per pecahan, dengan tanda naik/turun dan riwayat 1 gram.">
+<style>
+  :root {
+    --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,.10);
+    --up: #006300; --up-bg: rgba(12,163,12,.10); --down: #c02f2f; --down-bg: rgba(208,59,59,.10);
+    --s1: #2a78d6; --s2: #eb6834; --hover: rgba(11,11,11,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,.10);
+      --up: #0ca30c; --up-bg: rgba(12,163,12,.16); --down: #e66767; --down-bg: rgba(230,103,103,.16);
+      --s1: #3987e5; --s2: #d95926; --hover: rgba(255,255,255,.05);
+    }
+  }
+  :root[data-theme="dark"] {
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,.10);
+    --up: #0ca30c; --up-bg: rgba(12,163,12,.16); --down: #e66767; --down-bg: rgba(230,103,103,.16);
+    --s1: #3987e5; --s2: #d95926; --hover: rgba(255,255,255,.05);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 28px 16px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.01em; }
+  h2 { font-size: 15px; margin: 0 0 12px; }
+  .sub { color: var(--ink-2); margin: 0 0 20px; font-size: 13px; }
+  .card { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .tile { margin: 0; }
+  .tile .label { color: var(--ink-2); font-size: 13px; }
+  .tile .value { font-size: 28px; font-weight: 650; letter-spacing: -.02em; margin: 2px 0 6px; }
+
+  .delta { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 600;
+           padding: 1px 7px; border-radius: 999px; white-space: nowrap; color: var(--muted); }
+  .delta.up { color: var(--up); background: var(--up-bg); }
+  .delta.down { color: var(--down); background: var(--down-bg); }
+  .delta.flat { background: var(--hover); }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 9px 8px; text-align: right; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+  tbody tr:hover { background: var(--hover); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td .price { display: block; font-weight: 550; }
+  td .delta { margin-top: 3px; }
+
+  .chart-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .ranges { display: flex; gap: 4px; flex-wrap: wrap; }
+  .ranges button { font: inherit; font-size: 12.5px; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+                   border: 1px solid var(--ring); background: transparent; color: var(--ink-2); }
+  .ranges button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--ink-2); }
+  .legend i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .chart { position: relative; }
+  .chart svg { display: block; width: 100%; height: 260px; touch-action: pan-y; }
+  .chart text { fill: var(--muted); font-size: 11px; }
+  .tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--ring);
+         border-radius: 8px; padding: 7px 10px; font-size: 12.5px; box-shadow: 0 4px 14px rgba(0,0,0,.12);
+         white-space: nowrap; display: none; }
+  .tip b { display: block; margin-bottom: 2px; }
+  .tip i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+  .note { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .err { color: var(--down); }
+  footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
+  td:first-child { white-space: nowrap; }
+  @media (max-width: 560px) {
+    .card { padding: 12px; }
+    th, td { padding: 8px 4px; }
+    td .price { font-size: 14px; }
+    td .delta .pct { display: none; }
+    .g-long { display: none; }
+  }
+  @media (min-width: 561px) { .g-short { display: none; } }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Harga Emas UBS</h1>
+  <p class="sub" id="sub">Memuat data…</p>
+
+  <div class="tiles">
+    <section class="card tile"><div class="label">Harga Beli · 1 gram</div><div class="value" id="beli1">–</div><span id="beli1d"></span></section>
+    <section class="card tile"><div class="label">Buyback · 1 gram</div><div class="value" id="bb1">–</div><span id="bb1d"></span></section>
+  </div>
+
+  <section class="card">
+    <h2>Semua pecahan</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pecahan</th><th>Harga Beli</th><th>Buyback</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="note" id="basis"></p>
+  </section>
+
+  <section class="card">
+    <div class="chart-head">
+      <h2 style="margin:0">Riwayat 1 gram</h2>
+      <div class="ranges" id="ranges"></div>
+    </div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Buyback</span><span><i style="background:var(--s2)"></i>Harga beli</span></div>
+    <div class="chart" id="chart"><svg id="svg" role="img" aria-label="Grafik riwayat harga 1 gram"></svg><div class="tip" id="tip"></div></div>
+    <p class="note">Harga beli 1 gram tercatat sejak 16 Nov 2026; sebelumnya hanya buyback.</p>
+  </section>
+
+  <footer>Sumber: <a href="https://ubslifestyle.com/harga-buyback-hari-ini/" rel="noopener">ubslifestyle.com/harga-buyback-hari-ini</a>. Diperbarui otomatis tiap hari kerja.</footer>
+</main>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const nf = new Intl.NumberFormat("id-ID");
+  const rp = (n) => "Rp" + nf.format(n);
+  const pct = new Intl.NumberFormat("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: "always" });
+  const BULAN = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+  const BULAN_PANJANG = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  const ms = (s) => Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10));
+  const tglPanjang = (s) => `${+s.slice(8, 10)} ${BULAN_PANJANG[+s.slice(5, 7) - 1]} ${s.slice(0, 4)}`;
+  const tglPendek = (t, withYear) => { const d = new Date(t); return `${d.getUTCDate()} ${BULAN[d.getUTCMonth()]}` + (withYear ? ` ${String(d.getUTCFullYear()).slice(2)}` : ""); };
+
+  // Tanda naik/turun: ikon + angka + warna (warna tidak pernah sendirian).
+  function delta(cur, prev) {
+    const el = document.createElement("span");
+    if (prev == null) { el.className = "delta flat"; el.textContent = "Tidak ada pembanding"; return el; }
+    const diff = cur - prev;
+    if (diff === 0) { el.className = "delta flat"; el.textContent = "= Tetap"; el.title = "Tidak berubah"; return el; }
+    const up = diff > 0;
+    el.className = "delta " + (up ? "up" : "down");
+    el.innerHTML = `<span aria-hidden="true">${up ? "▲" : "▼"}</span> ${rp(Math.abs(diff))} <span class="pct">(${pct.format((diff / prev) * 100)}%)</span>`;
+    el.title = up ? "Naik" : "Turun";
+    return el;
+  }
+
+  async function getJSON(path) {
+    const r = await fetch(path, { cache: "no-store" });
+    if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
+    return r.json();
+  }
+
+  function renderPrices(harga, sebelum) {
+    const prevBy = new Map(sebelum.map((r) => [r.gram, r]));
+    const tgl = harga[0].tanggal, tglPrev = sebelum[0]?.tanggal;
+    $("sub").textContent = `Per ${tglPanjang(tgl)}` + (tglPrev ? ` · dibanding ${tglPanjang(tglPrev)}` : "");
+    $("basis").textContent = tglPrev ? `Tanda ▲/▼ membandingkan dengan harga ${tglPanjang(tglPrev)}.` : "";
+
+    const one = harga.find((r) => r.gram === 1), oneP = prevBy.get(1);
+    $("beli1").textContent = rp(one.beli);  $("beli1d").replaceWith(delta(one.beli, oneP?.beli));
+    $("bb1").textContent = rp(one.buyback); $("bb1d").replaceWith(delta(one.buyback, oneP?.buyback));
+
+    const tbody = $("rows");
+    for (const r of harga) {
+      const p = prevBy.get(r.gram);
+      const tr = document.createElement("tr");
+      const td0 = document.createElement("td"); const gl = String(r.gram).replace(".", ",");
+      td0.innerHTML = `${gl}<span class="g-long"> gram</span><span class="g-short"> g</span>`; tr.append(td0);
+      for (const k of ["beli", "buyback"]) {
+        const td = document.createElement("td");
+        const s = document.createElement("span"); s.className = "price"; s.textContent = rp(r[k]);
+        td.append(s, delta(r[k], p?.[k]));
+        tr.append(td);
+      }
+      tbody.append(tr);
+    }
+  }
+
+  // ---------- Grafik riwayat (SVG tanpa pustaka) ----------
+  const RANGES = [["7H", 7], ["1B", 31], ["3B", 92], ["6B", 183], ["1T", 366], ["3T", 1100]];
+  let riwayat = [], rangeDays = 92;
+
+  function niceTicks(lo, hi, n = 4) {
+    const span = hi - lo || hi || 1, raw = span / n, mag = 10 ** Math.floor(Math.log10(raw));
+    const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw);
+    const start = Math.floor(lo / step) * step, end = Math.ceil(hi / step) * step;
+    const out = []; for (let v = start; v <= end + step / 2; v += step) out.push(v);
+    return out;
+  }
+  const short = (v) => v >= 1e6 ? (v / 1e6).toLocaleString("id-ID", { maximumFractionDigits: 2 }) + " jt" : nf.format(v);
+
+  function drawChart() {
+    const svg = $("svg"), tip = $("tip");
+    const W = svg.clientWidth, H = 260, m = { t: 10, r: 12, b: 26, l: 56 };
+    if (W < m.l + m.r + 40) return;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    const lastT = ms(riwayat[riwayat.length - 1].tanggal);
+    const pts = riwayat.filter((r) => ms(r.tanggal) >= lastT - rangeDays * 864e5).map((r) => ({ ...r, t: ms(r.tanggal) }));
+    if (!pts.length) { svg.innerHTML = ""; return; }
+
+    const vals = pts.flatMap((p) => [p.buyback, p.beli].filter((v) => v != null));
+    const ticks = niceTicks(Math.min(...vals), Math.max(...vals));
+    const y0 = ticks[0], y1 = ticks[ticks.length - 1];
+    const t0 = pts[0].t, t1 = Math.max(pts[pts.length - 1].t, t0 + 864e5);
+    const X = (t) => m.l + ((t - t0) / (t1 - t0)) * (W - m.l - m.r);
+    const Y = (v) => m.t + (1 - (v - y0) / (y1 - y0)) * (H - m.t - m.b);
+
+    const NS = "http://www.w3.org/2000/svg";
+    const el = (tag, attrs, parent = svg) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.append(e); return e; };
+    svg.innerHTML = "";
+
+    for (const v of ticks) {
+      el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), stroke: v === y0 ? "var(--axis)" : "var(--grid)", "stroke-width": 1 });
+      el("text", { x: m.l - 8, y: Y(v) + 4, "text-anchor": "end" }).textContent = short(v);
+    }
+    const nX = Math.max(2, Math.min(6, Math.floor((W - m.l - m.r) / 90)));
+    const withYear = (t1 - t0) > 300 * 864e5;
+    for (let i = 0; i < nX; i++) {
+      const t = t0 + ((t1 - t0) * i) / (nX - 1);
+      el("text", { x: X(t), y: H - 8, "text-anchor": i === 0 ? "start" : i === nX - 1 ? "end" : "middle" }).textContent = tglPendek(t, withYear);
+    }
+
+    const series = [["buyback", "var(--s1)"], ["beli", "var(--s2)"]];
+    for (const [k, color] of series) {
+      const sp = pts.filter((p) => p[k] != null);
+      if (!sp.length) continue;
+      el("path", { d: sp.map((p, i) => `${i ? "L" : "M"}${X(p.t).toFixed(1)},${Y(p[k]).toFixed(1)}`).join(""),
+                   fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" });
+      if (sp.length <= 12) for (const p of sp) el("circle", { cx: X(p.t), cy: Y(p[k]), r: 4, fill: color, stroke: "var(--surface)", "stroke-width": 2 });
+    }
+
+    // Lapisan hover: garis bantu + titik + tooltip
+    const g = el("g", { style: "display:none" });
+    const cross = el("line", { y1: m.t, y2: H - m.b, stroke: "var(--axis)", "stroke-width": 1 }, g);
+    const dots = series.map(([, c]) => el("circle", { r: 4.5, fill: c, stroke: "var(--surface)", "stroke-width": 2 }, g));
+    const hit = el("rect", { x: m.l, y: 0, width: W - m.l - m.r, height: H, fill: "transparent" });
+
+    function show(evt) {
+      const box = svg.getBoundingClientRect();
+      const px = evt.clientX - box.left;
+      let best = pts[0];
+      for (const p of pts) if (Math.abs(X(p.t) - px) < Math.abs(X(best.t) - px)) best = p;
+      const x = X(best.t);
+      g.style.display = ""; cross.setAttribute("x1", x); cross.setAttribute("x2", x);
+      series.forEach(([k], i) => {
+        const v = best[k];
+        dots[i].style.display = v == null ? "none" : "";
+        if (v != null) { dots[i].setAttribute("cx", x); dots[i].setAttribute("cy", Y(v)); }
+      });
+      tip.innerHTML = `<b>${tglPanjang(best.tanggal)}</b>` +
+        `<div><i style="background:var(--s1)"></i>Buyback ${rp(best.buyback)}</div>` +
+        (best.beli != null ? `<div><i style="background:var(--s2)"></i>Harga beli ${rp(best.beli)}</div>` : "");
+      tip.style.display = "block";
+      const tw = tip.offsetWidth;
+      tip.style.left = (x + 12 + tw > W ? Math.max(0, x - tw - 12) : x + 12) + "px";
+      tip.style.top = "8px";
+    }
+    hit.addEventListener("pointermove", show);
+    hit.addEventListener("pointerdown", show);
+    hit.addEventListener("pointerleave", () => { g.style.display = "none"; tip.style.display = "none"; });
+  }
+
+  function renderRanges() {
+    const wrap = $("ranges");
+    for (const [label, days] of RANGES) {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = label; b.setAttribute("aria-pressed", days === rangeDays);
+      b.addEventListener("click", () => {
+        rangeDays = days;
+        for (const x of wrap.children) x.setAttribute("aria-pressed", x === b);
+        drawChart();
+      });
+      wrap.append(b);
+    }
+  }
+
+  Promise.all([getJSON("data/harga.json"), getJSON("data/harga-sebelumnya.json").catch(() => []), getJSON("data/riwayat.json")])
+    .then(([harga, sebelum, riw]) => {
+      renderPrices(harga, sebelum);
+      riwayat = riw.sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+      renderRanges(); drawChart();
+      let raf; addEventListener("resize", () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(drawChart); });
+    })
+    .catch((e) => {
+      const local = location.protocol === "file:";
+      $("sub").innerHTML = `<span class="err">Gagal memuat data${local ? ": buka lewat server lokal, mis. <code>python -m http.server</code>" : ""}.</span>`;
+      console.error(e);
+    });
+})();
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@ name: Update harga UBS
 on:
   schedule:
     # Senin–Jumat 10:17 dan 13:17 WIB (cron GitHub memakai UTC)
-    - cron: "17 3,6 * * 1-5"
+    - cron: "00 10 * * 1-5"
   workflow_dispatch:
 
 permissions:
